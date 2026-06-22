@@ -1,0 +1,47 @@
+services:
+  app:
+    build: .
+    container_name: leadbot_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: mysql://leadbot:leadbot_password@mysql:3306/leadbot
+      SHADOW_DATABASE_URL: mysql://leadbot:leadbot_password@mysql:3306/leadbot_shadow
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    command: npm run dev
+
+  mysql:
+    image: mysql:8.0
+    container_name: leadbot_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: leadbot
+      MYSQL_USER: leadbot
+      MYSQL_PASSWORD: leadbot_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: leadbot_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+
+volumes:
+  mysql_data:
