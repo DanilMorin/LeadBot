@@ -6,10 +6,18 @@
 import { Context, Telegraf } from 'telegraf-hardened';
 import { message } from 'telegraf-hardened/filters';
 import { env } from '../../config/env';
-import { leadStatusKeyboard } from '../../keyboards/lead.keyboard';
+import {
+  leadFlowKeyboard,
+  leadStatusKeyboard,
+  mainKeyboard,
+} from '../../keyboards/lead.keyboard';
 import { formatLeadMessage } from '../../modules/leads/lead.formatter';
 import { leadService } from '../../modules/leads/lead.service';
-import { isValidName, isValidPhone, isValidService, } from '../../modules/leads/lead.validator';
+import {
+  isValidName,
+  isValidService,
+  normalizeRussianPhone,
+} from '../../modules/leads/lead.validator';
 import { LeadDraft, leadDrafts } from '../../types/session.types';
 
 async function startLeadFlow(ctx: Context): Promise<void> {
@@ -18,7 +26,7 @@ async function startLeadFlow(ctx: Context): Promise<void> {
   }
 
   leadDrafts.set(ctx.from.id, { step: 'name' });
-  await ctx.reply('Как вас зовут?');
+  await ctx.reply('Как вас зовут?', leadFlowKeyboard());
 }
 
 async function handleNameStep(
@@ -27,13 +35,19 @@ async function handleNameStep(
   name: string,
 ): Promise<void> {
   if (!isValidName(name)) {
-    await ctx.reply('Имя должно содержать от 2 до 100 символов. Попробуйте ещё раз:');
+    await ctx.reply(
+      'Имя должно содержать от 2 до 100 символов. Попробуйте ещё раз:',
+      leadFlowKeyboard(),
+    );
     return;
   }
 
   draft.name = name;
   draft.step = 'phone';
-  await ctx.reply('Введите ваш телефон:');
+  await ctx.reply(
+    'Введите российский мобильный номер, например +7 999 123-45-67:',
+    leadFlowKeyboard(),
+  );
 }
 
 async function handlePhoneStep(
@@ -41,14 +55,19 @@ async function handlePhoneStep(
   draft: LeadDraft,
   phone: string,
 ): Promise<void> {
-  if (!isValidPhone(phone)) {
-    await ctx.reply('Похоже, телефон введён некорректно. Попробуйте ещё раз:');
+  const normalizedPhone = normalizeRussianPhone(phone);
+
+  if (!normalizedPhone) {
+    await ctx.reply(
+      'Введите номер в формате +7 9XX XXX-XX-XX или 8 9XX XXX-XX-XX:',
+      leadFlowKeyboard(),
+    );
     return;
   }
 
-  draft.phone = phone;
+  draft.phone = normalizedPhone;
   draft.step = 'service';
-  await ctx.reply('Какая услуга вас интересует?');
+  await ctx.reply('Какая услуга вас интересует?', leadFlowKeyboard());
 }
 
 async function handleServiceStep(
@@ -57,13 +76,19 @@ async function handleServiceStep(
   service: string,
 ): Promise<void> {
   if (!isValidService(service)) {
-    await ctx.reply('Название услуги должно содержать от 2 до 200 символов. Попробуйте ещё раз:');
+    await ctx.reply(
+      'Название услуги должно содержать от 2 до 200 символов. Попробуйте ещё раз:',
+      leadFlowKeyboard(),
+    );
     return;
   }
 
   draft.service = service;
   draft.step = 'comment';
-  await ctx.reply('Добавьте комментарий. Если комментария нет, напишите "-"');
+  await ctx.reply(
+    'Добавьте комментарий. Если комментария нет, напишите "-"',
+    leadFlowKeyboard(),
+  );
 }
 
 async function handleCommentStep(
@@ -74,7 +99,10 @@ async function handleCommentStep(
 ): Promise<void> {
   if (!draft.name || !draft.phone || !draft.service) {
     leadDrafts.delete(userId);
-    await ctx.reply('Не удалось завершить заявку. Пожалуйста, начните заполнение заново.');
+    await ctx.reply(
+      'Не удалось завершить заявку. Пожалуйста, начните заполнение заново.',
+      mainKeyboard(),
+    );
     return;
   }
 
@@ -87,7 +115,7 @@ async function handleCommentStep(
   });
 
   leadDrafts.delete(userId);
-  await ctx.reply('Спасибо! Ваша заявка принята.');
+  await ctx.reply('Спасибо! Ваша заявка принята.', mainKeyboard());
 
   await ctx.telegram.sendMessage(
     env.adminChatId,
@@ -109,6 +137,10 @@ async function handleLeadText(ctx: Context): Promise<void> {
   }
 
   const text = ctx.message.text.trim();
+
+  if (text.startsWith('/')) {
+    return;
+  }
 
   switch (draft.step) {
     case 'name':

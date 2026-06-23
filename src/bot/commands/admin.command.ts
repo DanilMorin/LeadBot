@@ -1,14 +1,11 @@
 import { Telegraf } from 'telegraf-hardened';
-import { env } from '../../config/env';
+import { formatLeadShort } from '../../modules/leads/lead.formatter';
 import { leadService } from '../../modules/leads/lead.service';
-
-function isAdmin(chatId: number | string): boolean {
-  return String(chatId) === String(env.adminChatId);
-}
+import { isAdminChat } from '../../utils/admin';
 
 export function registerAdminCommand(bot: Telegraf) {
   bot.command('leads', async (ctx) => {
-    if (!ctx.chat || !isAdmin(ctx.chat.id)) {
+    if (!ctx.chat || !isAdminChat(ctx.chat.id)) {
       await ctx.reply('У вас нет доступа к этой команде.');
       return;
     }
@@ -20,17 +17,12 @@ export function registerAdminCommand(bot: Telegraf) {
       return;
     }
 
-    const message = leads
-      .map((lead) => {
-        return [
-          `#${lead.id} — ${lead.status}`,
-          `Имя: ${lead.name}`,
-          `Телефон: ${lead.phone}`,
-          `Услуга: ${lead.service}`,
-        ].join('\n');
-      })
-      .join('\n\n');
+    const message = leads.map(formatLeadShort).join('\n\n');
 
     await ctx.reply(message);
+  });
+
+  bot.command('id', async (ctx) => {
+    await ctx.reply(`Ваш chat_id: ${ctx.chat.id}`);
   });
 }
