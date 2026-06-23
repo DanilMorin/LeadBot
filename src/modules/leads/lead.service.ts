@@ -39,6 +39,18 @@ export class LeadService {
       data: { status },
     });
   }
+
+  async getLeadsByStatus(status: LeadStatus, limit = 10) {
+    return prisma.lead.findMany({
+      where: {
+        status,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
+    });
+  }
 }
 
 export const leadService = new LeadService();
