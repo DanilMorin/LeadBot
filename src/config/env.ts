@@ -1,3 +1,6 @@
+/*
+ *Регистрация переменных окружения и их валидация
+ */
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -18,4 +21,5 @@ export const env = {
   apiPort: Number(process.env.API_PORT || 3000),
   databaseUrl: getEnv('DATABASE_URL'),
   shadowDatabaseUrl: getEnv('SHADOW_DATABASE_URL'),
+  apiToken: getEnv('API_TOKEN'),
 };
