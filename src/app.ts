@@ -8,23 +8,23 @@ async function bootstrap() {
 
   await bot.validateTokenAsync();
 
-  await bot.launch({
-    polling: {
-      retryOnConflict: true,
-      maxRetryDelay: 30000,
-    },
-  });
-
   const api = createApiServer();
 
   api.listen(env.apiPort, () => {
     logger.info(`API server started on port ${env.apiPort}`);
   });
 
-  logger.info('LeadBot started');
-
   process.once('SIGINT', () => bot.stop('SIGINT'));
   process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
+  logger.info('LeadBot started');
+
+  await bot.launch({
+    polling: {
+      retryOnConflict: true,
+      maxRetryDelay: 30000,
+    },
+  });
 }
 
 bootstrap().catch((error) => {
