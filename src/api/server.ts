@@ -1,11 +1,16 @@
 import cors from 'cors';
 import express from 'express';
-import { apiAuthMiddleware } from './middlewares/api-auth.middleware';
+import path from 'path';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { leadsRouter } from './routes/leads.routes';
 
 export function createApiServer() {
   const app = express();
+  const webRoot = path.resolve(process.cwd(), 'web');
+
+  app.set('json replacer', (_key: string, value: unknown) =>
+    typeof value === 'bigint' ? value.toString() : value
+  );
 
   app.use(cors());
   app.use(express.json());
@@ -16,7 +21,11 @@ export function createApiServer() {
     });
   });
 
-  app.use('/api/leads', apiAuthMiddleware, leadsRouter); //потом ограничю под домен проекта, пока что оставлю для локальной разработки
+  app.use('/api/leads', leadsRouter);
+  app.get('/', (_req, res) => {
+    res.sendFile(path.join(webRoot, 'index.html'));
+  });
+  app.use(express.static(webRoot));
 
   app.use(errorMiddleware);
 

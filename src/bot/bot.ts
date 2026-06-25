@@ -10,7 +10,18 @@ import { registerLeadFlow } from './handlers/lead-flow.handler';
 import { registerStatusCallbacks } from './handlers/status-callback.handler';
 
 export function createBot() {
-  const bot = new Telegraf(env.botToken);
+  const botOptions = env.telegramProxyUrl
+    ? {
+        telegram: {
+          proxy: {
+            proxy: env.telegramProxyUrl,
+            FetchClient: loadTelegramFetchClient(),
+          },
+        },
+      }
+    : undefined;
+
+  const bot = new Telegraf(env.botToken, botOptions);
 
   registerStartCommand(bot);
   registerAdminCommand(bot);
@@ -25,4 +36,16 @@ export function createBot() {
   });
 
   return bot;
+}
+
+function loadTelegramFetchClient() {
+  try {
+    const { FetchClient } = require('@telegraf-hardened/fetch');
+
+    return FetchClient;
+  } catch {
+    throw new Error(
+      'TELEGRAM_PROXY_URL requires @telegraf-hardened/fetch. Install it with: npm install @telegraf-hardened/fetch'
+    );
+  }
 }

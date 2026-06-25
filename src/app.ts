@@ -4,27 +4,36 @@ import { env } from './config/env';
 import { logger } from './utils/logger';
 
 async function bootstrap() {
-  const bot = createBot();
-
-  await bot.validateTokenAsync();
-
   const api = createApiServer();
 
   api.listen(env.apiPort, () => {
     logger.info(`API server started on port ${env.apiPort}`);
   });
 
-  process.once('SIGINT', () => bot.stop('SIGINT'));
-  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+  logger.info('LeadBot API started');
 
-  logger.info('LeadBot started');
+  if (!env.botEnabled) {
+    logger.info('Telegram bot disabled by BOT_ENABLED=false');
+    return;
+  }
 
-  await bot.launch({
-    polling: {
-      retryOnConflict: true,
-      maxRetryDelay: 30000,
-    },
-  });
+  try {
+    const bot = createBot();
+
+    process.once('SIGINT', () => bot.stop('SIGINT'));
+    process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
+    await bot.validateTokenAsync();
+
+    await bot.launch({
+      polling: {
+        retryOnConflict: true,
+        maxRetryDelay: 30000,
+      },
+    });
+  } catch (error) {
+    logger.error('Telegram bot start error:', error);
+  }
 }
 
 bootstrap().catch((error) => {
