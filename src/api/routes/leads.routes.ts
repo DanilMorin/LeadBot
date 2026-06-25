@@ -2,13 +2,20 @@
  *Роуты для работы с заявками
  */
 import { Request, Response, NextFunction } from 'express';
-import { LeadStatus } from '@prisma/client';
+import { Lead, LeadStatus } from '@prisma/client';
 import { Router } from 'express';
 import { LEAD_LIMITS } from '../../modules/leads/lead.constants';
 import { leadService } from '../../modules/leads/lead.service';
 import { HttpError } from '../../utils/http-error';
 
 export const leadsRouter = Router();
+
+function serializeLead(lead: Lead) {
+  return {
+    ...lead,
+    telegramId: lead.telegramId?.toString() ?? null,
+  };
+}
 
 function parseLeadStatus(value: unknown): LeadStatus | undefined { //парсим статус заявки из запроса
   if (!value) {
@@ -55,7 +62,7 @@ leadsRouter.get('/', async (req, res, next) => { //получение списк
     });
 
     res.json({
-      data: leads,
+      data: leads.map(serializeLead),
     });
   } catch (error) {
     next(error);
@@ -85,7 +92,7 @@ leadsRouter.get('/:id', async (req, res, next) => { // получение одн
     const lead = await leadService.getLeadById(id);
 
     res.json({
-      data: lead,
+      data: serializeLead(lead),
     });
   } catch (error) {
     next(error);
@@ -109,7 +116,7 @@ leadsRouter.patch('/:id/status', async (req, res, next) => { //обновлен�
     const lead = await leadService.updateStatus(id, status);
 
     res.json({
-      data: lead,
+      data: serializeLead(lead),
     });
   } catch (error) {
     next(error);
