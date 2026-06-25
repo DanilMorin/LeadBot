@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>LeadBot Dashboard</title>
+
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div>
+        <h1 class="header__title">LeadBot</h1>
+        <p class="header__subtitle">Панель управления заявками</p>
+      </div>
+
+      <button class="button button--secondary" id="refreshButton">
+        Обновить
+      </button>
+    </header>
+
+    <main class="main">
+      <section class="stats" id="stats">
+        <article class="stat-card">
+          <span class="stat-card__label">Всего</span>
+          <strong class="stat-card__value" id="totalCount">0</strong>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-card__label">Новые:</span>
+          <strong class="stat-card__value" id="newCount">0</strong>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-card__label">В работе:</span>
+          <strong class="stat-card__value" id="inProgressCount">0</strong>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-card__label">Закрытые</span>
+          <strong class="stat-card__value" id="closedCount">0</strong>
+        </article>
+      </section>
+
+      <section class="filters">
+        <button class="filter-button is-active" data-status="">
+          Все
+        </button>
+        <button class="filter-button" data-status="NEW">
+          Новые
+        </button>
+        <button class="filter-button" data-status="IN_PROGRESS">
+          В работе
+        </button>
+        <button class="filter-button" data-status="CLOSED">
+          Закрытые
+        </button>
+      </section>
+
+      <section class="content">
+        <section class="leads">
+          <div class="section-head">
+            <h2 class="section-title">Заявки</h2>
+            <span class="section-counter" id="leadsCounter">0</span>
+          </div>
+
+          <div class="leads-list" id="leadsList">
+            <p class="empty-text">Загрузка заявок...</p>
+          </div>
+        </section>
+
+        <aside class="lead-detail" id="leadDetail">
+          <p class="empty-text">Выберите заявку из списка</p>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/render.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

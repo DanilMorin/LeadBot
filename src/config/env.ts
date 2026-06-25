@@ -17,9 +17,10 @@ function getEnv(name: string): string {
 
 export const env = {
   botToken: getEnv('BOT_TOKEN'),
+  botEnabled: process.env.BOT_ENABLED !== 'false',
+  telegramProxyUrl: process.env.TELEGRAM_PROXY_URL,
   adminChatId: getEnv('ADMIN_CHAT_ID'),
   apiPort: Number(process.env.API_PORT || 3000),
   databaseUrl: getEnv('DATABASE_URL'),
   shadowDatabaseUrl: getEnv('SHADOW_DATABASE_URL'),
-  apiToken: getEnv('API_TOKEN'),
 };
