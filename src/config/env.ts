@@ -23,4 +23,5 @@ export const env = {
   apiPort: Number(process.env.API_PORT || 3000),
   databaseUrl: getEnv('DATABASE_URL'),
   shadowDatabaseUrl: getEnv('SHADOW_DATABASE_URL'),
+   webAppUrl: getEnv('WEB_APP_URL'),
 };
