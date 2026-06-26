@@ -1,11 +1,14 @@
 import { Markup } from 'telegraf-hardened';
+import { env } from '../config/env';
 
 export function mainKeyboard() {
-  return Markup.keyboard([['Оставить заявку']]).resize().persistent();
-}
-
-export function leadFlowKeyboard() {
-  return Markup.keyboard([['Отменить']]).resize().persistent();
+  return Markup.keyboard([
+    ['Оставить заявку'],
+    [
+      Markup.button.webApp('Открыть дашборд', env.webAppUrl),
+    ],
+    ['Отменить'],
+  ]).resize();
 }
 
 export function leadStatusKeyboard(leadId: number) {

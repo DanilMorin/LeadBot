@@ -8,6 +8,7 @@ import { registerExportCommand } from './commands/export.command';
 import { registerNewLeadsCommand } from './commands/new-leads.command';
 import { registerLeadFlow } from './handlers/lead-flow.handler';
 import { registerStatusCallbacks } from './handlers/status-callback.handler';
+import { registerDashboardCommand } from './commands/dashboard.command';
 
 export function createBot() {
   const botOptions = env.telegramProxyUrl
@@ -30,6 +31,7 @@ export function createBot() {
   registerCancelCommand(bot);
   registerLeadFlow(bot);
   registerStatusCallbacks(bot);
+  registerDashboardCommand(bot);
 
   bot.catch((error, ctx) => {
     logger.error(`Bot error for update ${ctx.update.update_id}`, error);

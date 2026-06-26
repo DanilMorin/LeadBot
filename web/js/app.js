@@ -87,4 +87,5 @@ document.querySelector('#leadDetail').addEventListener('click', (event) => {
   changeLeadStatus(statusButton.dataset.leadId, statusButton.dataset.changeStatus);
 });
 
+initTelegramApp();
 loadDashboard();
